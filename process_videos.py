@@ -2,6 +2,10 @@ import os
 from openai import OpenAI
 import whisper
 from moviepy.editor import VideoFileClip
+from dotenv import load_dotenv
+
+# Carrega variáveis de ambiente do arquivo .env
+load_dotenv()
 
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
