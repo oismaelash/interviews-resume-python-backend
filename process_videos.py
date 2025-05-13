@@ -21,15 +21,22 @@ videos_com_erro = []
 
 def extrair_audio(video_path, audio_path):
     video = VideoFileClip(video_path)
+    # Obter a duração do vídeo em minutos
+    duracao_minutos = video.duration / 60
     video.audio.write_audiofile(audio_path, codec='mp3', verbose=False, logger=None)
+    return duracao_minutos
 
 def transcrever_audio(audio_path):
     resultado = modelo_whisper.transcribe(audio_path)
     return resultado['text']
 
-def resumir_texto(texto):
+def resumir_texto(texto, duracao_minutos):
+    # Formatar duração para incluir no prompt
+    duracao_formatada = f"{int(duracao_minutos)} minutos" if duracao_minutos >= 1 else f"{int(duracao_minutos * 60)} segundos"
+    
     prompt = (
         os.environ.get("PROMPT_ENTREVISTA") +
+        f"\n\nDuração da entrevista: {duracao_formatada}\n\n" +
         f"{texto}"
     )
     resposta = client.chat.completions.create(
@@ -48,12 +55,14 @@ def processar_video(video_filename):
 
     try:
         print(f"Iniciando: {video_filename}")
-        extrair_audio(caminho_video, caminho_audio)
+        # Extrair áudio e obter duração
+        duracao_minutos = extrair_audio(caminho_video, caminho_audio)
         texto = transcrever_audio(caminho_audio)
         with open(caminho_transcricao, 'w', encoding='utf-8') as f:
             f.write(texto)
 
-        resumo = resumir_texto(texto)
+        # Passar a duração para a função de resumo
+        resumo = resumir_texto(texto, duracao_minutos)
         with open(caminho_resumo, 'w', encoding='utf-8') as f:
             f.write(resumo)
 
