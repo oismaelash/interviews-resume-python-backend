@@ -46,15 +46,21 @@ def resumir_texto(texto, duracao_minutos):
     return resposta.choices[0].message.content.strip()
     # return "Resumo desativado - OpenAI comentado"
 
-def processar_video(video_filename):
-    nome_base = os.path.splitext(video_filename)[0]
-    caminho_video = os.path.join(PASTA_VIDEOS, video_filename)
-    caminho_audio = os.path.join(PASTA_SAIDA, f"{nome_base}.mp3")
-    caminho_transcricao = os.path.join(PASTA_SAIDA, f"{nome_base}.txt")
-    caminho_resumo = os.path.join(PASTA_SAIDA, f"{nome_base}_resumo.txt")
+def processar_video(video_path_relativo):
+    # video_path_relativo pode ser apenas o nome do arquivo ou um caminho com subpastas
+    nome_base = os.path.splitext(os.path.basename(video_path_relativo))[0]
+    caminho_video = os.path.join(PASTA_VIDEOS, video_path_relativo)
+    
+    # Criar estrutura de pastas na saída para manter organização
+    pasta_saida_video = os.path.join(PASTA_SAIDA, os.path.dirname(video_path_relativo))
+    os.makedirs(pasta_saida_video, exist_ok=True)
+    
+    caminho_audio = os.path.join(pasta_saida_video, f"{nome_base}.mp3")
+    caminho_transcricao = os.path.join(pasta_saida_video, f"{nome_base}.txt")
+    caminho_resumo = os.path.join(pasta_saida_video, f"{nome_base}_resumo.txt")
 
     try:
-        print(f"Iniciando: {video_filename}")
+        print(f"Iniciando: {video_path_relativo}")
         # Extrair áudio e obter duração
         duracao_minutos = extrair_audio(caminho_video, caminho_audio)
         texto = transcrever_audio(caminho_audio)
@@ -62,14 +68,14 @@ def processar_video(video_filename):
             f.write(texto)
 
         # Passar a duração para a função de resumo
-        resumo = resumir_texto(texto, duracao_minutos)
-        with open(caminho_resumo, 'w', encoding='utf-8') as f:
-            f.write(resumo)
+        # resumo = resumir_texto(texto, duracao_minutos)
+        # with open(caminho_resumo, 'w', encoding='utf-8') as f:
+        #     f.write(resumo)
 
-        print(f"Finalizado: {video_filename}")
+        print(f"Finalizado: {video_path_relativo}")
     except Exception as e:
-        print(f"[ERRO] {video_filename} - {e}")
-        videos_com_erro.append(video_filename)
+        print(f"[ERRO] {video_path_relativo} - {e}")
+        videos_com_erro.append(video_path_relativo)
 
 # Permite repetir só os vídeos com erro
 def carregar_erros_antigos():
@@ -79,10 +85,18 @@ def carregar_erros_antigos():
             return [linha.strip() for linha in f.readlines()]
     return []
 
-videos_para_processar = [
-    f for f in os.listdir(PASTA_VIDEOS)
-    if f.endswith('.mp4') and not f.startswith('.')
-]
+def encontrar_videos_recursivamente(pasta):
+    """Encontra todos os vídeos .mp4 na pasta e subpastas"""
+    videos = []
+    for root, dirs, files in os.walk(pasta):
+        for file in files:
+            if file.endswith('.mp4') and not file.startswith('.'):
+                # Manter o caminho relativo à pasta de vídeos
+                caminho_relativo = os.path.relpath(os.path.join(root, file), pasta)
+                videos.append(caminho_relativo)
+    return videos
+
+videos_para_processar = encontrar_videos_recursivamente(PASTA_VIDEOS)
 
 # Opção: só reprocessar vídeos com erro anterior
 reprocessar_falhas = os.getenv('REPROCESSAR_FALHAS', 'false').lower() == 'true'

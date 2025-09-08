@@ -12,6 +12,8 @@ COPY . /app
 # Instalar dependências
 RUN pip install moviepy==1.0.3
 RUN pip install -r requirements.txt
+
+COPY .env /app/.env
 # RUN pip install --no-cache-dir moviepy==1.0.3
 # RUN pip install --no-cache-dir -r requirements.txt
 
@@ -22,4 +24,4 @@ CMD ["python", "process_videos.py"]
 # docker build -t process-videos .
 
 # 2. Rodar o container (mapeando a pasta com os vídeos)
-# docker run -v "C:\Users\conta\OneDrive\Documents\workspace\_oismaelash\interviews-resume\videos":/app/videos --env-file .env process-videos
+# docker run -v "C:\Users\conta\OneDrive\Documents\workspace\_oismaelash\interviews-resume\videos":/app/videos process-videos
