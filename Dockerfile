@@ -13,7 +13,7 @@ COPY . /app
 RUN pip install moviepy==1.0.3
 RUN pip install -r requirements.txt
 
-COPY .env /app/.env
+COPY .env .
 # RUN pip install --no-cache-dir moviepy==1.0.3
 # RUN pip install --no-cache-dir -r requirements.txt
 

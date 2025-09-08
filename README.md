@@ -95,7 +95,7 @@ python process_videos.py
 1. Place your MP4 video files in the `videos/` directory
 2. Run the container:
 ```bash
-docker run -v "$(pwd)/videos":/app/videos --env-file .env process-videos
+docker run -v "$(pwd)/videos":/app/videos process-videos
 ```
 
 ## Output
