@@ -144,7 +144,7 @@ def process_video(relative_video_path):
     
     audio_path = os.path.join(video_output_folder, f"{base_name}.mp3")
     transcription_path = os.path.join(video_output_folder, f"{base_name}.txt")
-    summary_path = os.path.join(video_output_folder, f"{base_name}_resume.txt")
+    summary_path = os.path.join(video_output_folder, f"{base_name}_resume.md")
 
     print(f"Memory usage before processing: {get_memory_usage():.1f} MB")
     
@@ -202,6 +202,7 @@ def find_videos_recursively(folder):
     return videos
 
 videos_to_process = find_videos_recursively(VIDEOS_FOLDER)
+print(f"Found {len(videos_to_process)} videos to process")
 
 # Option: only reprocess videos with previous error
 reprocess_failures = os.getenv('REPROCESS_FAILURES', 'false').lower() == 'true'
