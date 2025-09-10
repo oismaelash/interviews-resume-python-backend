@@ -2,3 +2,4 @@ openai
 openai-whisper
 moviepy==1.0.3
 dotenv
+ollama
