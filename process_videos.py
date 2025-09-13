@@ -9,24 +9,16 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# os.environ["OLLAMA_HOST"] = "127.0.0.1:11434"
+print(os.environ["OLLAMA_HOST"])
 # Initialize the Ollama client
 client = ollama.Client()
-
-# Define the model
-# OLLAMA_MODEL = "deepseek-r1:8b"
-# OLLAMA_MODEL = "interview-resume"
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL")
-print(f"Loading Ollama model: {OLLAMA_MODEL}")
 
 VIDEOS_FOLDER = 'videos'
 OUTPUT_FOLDER = os.path.join(VIDEOS_FOLDER, "results")
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# Use a smaller model to reduce memory usage
-# Options: tiny, base, small, medium, large, large-v2, large-v3
-WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "base")
-print(f"Loading Whisper model: {WHISPER_MODEL}")
-whisper_model = whisper.load_model(WHISPER_MODEL)
+
 
 videos_with_error = []
 
@@ -203,6 +195,23 @@ def find_videos_recursively(folder):
 
 videos_to_process = find_videos_recursively(VIDEOS_FOLDER)
 print(f"Found {len(videos_to_process)} videos to process")
+
+# Define the model
+# OLLAMA_MODEL = "deepseek-r1:8b"
+# OLLAMA_MODEL = "interview-resume"
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL")
+print(f"Loading Ollama model: {OLLAMA_MODEL}")
+
+# if JUST_SUMMARIZE is true, whisper load model is not needed
+if os.getenv('JUST_SUMMARIZE', 'false').lower() == 'true':
+    print("Just summarizing, skipping video processing")
+    exit()
+else:
+    # Use a smaller model to reduce memory usage
+    # Options: tiny, base, small, medium, large, large-v2, large-v3
+    WHISPER_MODEL = os.environ.get("WHISPER_MODEL", "base")
+    print(f"Loading Whisper model: {WHISPER_MODEL}")
+    whisper_model = whisper.load_model(WHISPER_MODEL)
 
 # Option: only reprocess videos with previous error
 reprocess_failures = os.getenv('REPROCESS_FAILURES', 'false').lower() == 'true'
